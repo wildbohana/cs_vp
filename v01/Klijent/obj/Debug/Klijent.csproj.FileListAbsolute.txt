@@ -1,0 +1,11 @@
+C:\Users\wildb\Desktop\wtf\vp\v01\Klijent\bin\Debug\Klijent.exe.config
+C:\Users\wildb\Desktop\wtf\vp\v01\Klijent\bin\Debug\Klijent.exe
+C:\Users\wildb\Desktop\wtf\vp\v01\Klijent\bin\Debug\Klijent.pdb
+C:\Users\wildb\Desktop\wtf\vp\v01\Klijent\bin\Debug\Common.dll
+C:\Users\wildb\Desktop\wtf\vp\v01\Klijent\bin\Debug\Common.pdb
+C:\Users\wildb\Desktop\wtf\vp\v01\Klijent\obj\Debug\Klijent.csproj.AssemblyReference.cache
+C:\Users\wildb\Desktop\wtf\vp\v01\Klijent\obj\Debug\Klijent.csproj.SuggestedBindingRedirects.cache
+C:\Users\wildb\Desktop\wtf\vp\v01\Klijent\obj\Debug\Klijent.csproj.CoreCompileInputs.cache
+C:\Users\wildb\Desktop\wtf\vp\v01\Klijent\obj\Debug\Klijent.csproj.CopyComplete
+C:\Users\wildb\Desktop\wtf\vp\v01\Klijent\obj\Debug\Klijent.exe
+C:\Users\wildb\Desktop\wtf\vp\v01\Klijent\obj\Debug\Klijent.pdb

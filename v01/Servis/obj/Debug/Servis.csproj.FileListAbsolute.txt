@@ -1,0 +1,11 @@
+C:\Users\wildb\Desktop\wtf\vp\v01\Servis\bin\Debug\Servis.exe.config
+C:\Users\wildb\Desktop\wtf\vp\v01\Servis\bin\Debug\Servis.exe
+C:\Users\wildb\Desktop\wtf\vp\v01\Servis\bin\Debug\Servis.pdb
+C:\Users\wildb\Desktop\wtf\vp\v01\Servis\bin\Debug\Common.dll
+C:\Users\wildb\Desktop\wtf\vp\v01\Servis\bin\Debug\Common.pdb
+C:\Users\wildb\Desktop\wtf\vp\v01\Servis\obj\Debug\Servis.csproj.AssemblyReference.cache
+C:\Users\wildb\Desktop\wtf\vp\v01\Servis\obj\Debug\Servis.csproj.SuggestedBindingRedirects.cache
+C:\Users\wildb\Desktop\wtf\vp\v01\Servis\obj\Debug\Servis.csproj.CoreCompileInputs.cache
+C:\Users\wildb\Desktop\wtf\vp\v01\Servis\obj\Debug\Servis.csproj.CopyComplete
+C:\Users\wildb\Desktop\wtf\vp\v01\Servis\obj\Debug\Servis.exe
+C:\Users\wildb\Desktop\wtf\vp\v01\Servis\obj\Debug\Servis.pdb

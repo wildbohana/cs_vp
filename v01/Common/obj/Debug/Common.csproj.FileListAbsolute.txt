@@ -1,0 +1,6 @@
+C:\Users\wildb\Desktop\wtf\vp\v01\Common\bin\Debug\Common.dll
+C:\Users\wildb\Desktop\wtf\vp\v01\Common\bin\Debug\Common.pdb
+C:\Users\wildb\Desktop\wtf\vp\v01\Common\obj\Debug\Common.csproj.AssemblyReference.cache
+C:\Users\wildb\Desktop\wtf\vp\v01\Common\obj\Debug\Common.csproj.CoreCompileInputs.cache
+C:\Users\wildb\Desktop\wtf\vp\v01\Common\obj\Debug\Common.dll
+C:\Users\wildb\Desktop\wtf\vp\v01\Common\obj\Debug\Common.pdb
