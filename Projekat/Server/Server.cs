@@ -9,7 +9,8 @@ namespace Service
 {
     public class Server : IServer
     {
-        public void UpitOdKlijenta(DateTime datum)
+        // Uroš
+        public Tuple<List<Load>, Audit> UpitOdKlijenta(DateTime datum)
         {
             throw new NotImplementedException();
         }

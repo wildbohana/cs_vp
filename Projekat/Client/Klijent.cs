@@ -9,15 +9,21 @@ namespace Client
 {
     public class Klijent
     {
+        // Zoran
         public void RadKlijenta(IServer kanal)
         {
             // Unos i validacija datuma
 
-
             // Poziv serverske metode
-            // kanal.UpitOdKlijenta(datum);
+            // List<Load> = kanal.UpitOdKlijenta(datum);
 
             // Čuvanje rezultata pretrage u CSV fajl
+            // Ispis poruke o kreiranoj datoteci (poruka sadrži i podatke o putanji i imenu datoteke)
+        }
+
+        // Nikola
+        public void UpisUCSV(List<Load> podaci)
+        {
 
         }
     }

@@ -11,6 +11,6 @@ namespace Common
     public interface IServer
     {
         [OperationContract]
-        void UpitOdKlijenta(DateTime datum);    // DateTime ili string?
+        Tuple<List<Load>, Audit> UpitOdKlijenta(DateTime datum);
     }
 }
