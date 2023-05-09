@@ -10,6 +10,7 @@ namespace Common
     public enum MessageType
     {
         [EnumMember] Error,
-        [EnumMember] Info
+        [EnumMember] Info,
+        [EnumMember] Warning
     }
 }

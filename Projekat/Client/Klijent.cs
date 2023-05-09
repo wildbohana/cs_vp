@@ -1,6 +1,7 @@
 ﻿using Common;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,7 +25,14 @@ namespace Client
         // Nikola
         public void UpisUCSV(List<Load> podaci)
         {
+            string putanja = GetSetting("putanja");
 
+        }
+
+        // Za učitavanje putanje iz App.config
+        private static string GetSetting(string key)
+        {
+            return ConfigurationManager.AppSettings[key];
         }
     }
 }
