@@ -24,12 +24,33 @@ namespace Common
         [DataMember]
         public string Message { get => message; set => message = value; }
 
+        // Konstruktori
+        public Audit() { }
+
         public Audit(int id, DateTime timestamp, MessageType messageType, string message)
         {
             this.id = id;
             this.timestamp = timestamp;
             this.messageType = messageType;
             this.message = message;
+        }
+
+        // Ispis
+        public override string ToString()
+        {
+            return $"{Timestamp} [{MessageType}]: {Message} (ID: {Id})";
+        }
+
+        // Equals
+        public override bool Equals(object obj)
+        {
+            return obj is Audit a && Id == a.Id && Timestamp == a.Timestamp && MessageType == a.MessageType && Message == a.Message;
+        }
+
+        // GetHashCode - da ne bi izbacivao Warning
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 }

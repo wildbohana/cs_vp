@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Service", "Server\Service.c
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{1A271E94-FDCA-4954-97FA-91B73F84BFE9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XMLDB", "XMLDB\XMLDB.csproj", "{B4F98252-24C9-47CA-8F5F-D8B484B92F22}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{1A271E94-FDCA-4954-97FA-91B73F84BFE9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A271E94-FDCA-4954-97FA-91B73F84BFE9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A271E94-FDCA-4954-97FA-91B73F84BFE9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4F98252-24C9-47CA-8F5F-D8B484B92F22}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4F98252-24C9-47CA-8F5F-D8B484B92F22}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4F98252-24C9-47CA-8F5F-D8B484B92F22}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4F98252-24C9-47CA-8F5F-D8B484B92F22}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

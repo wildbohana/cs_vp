@@ -23,6 +23,9 @@ namespace Common
         public double ForecastValue { get => forecastValue; set => forecastValue = value; }
         [DataMember]
         public double MeasuredValue { get => measuredValue; set => measuredValue = value; }
+        
+        // Konstruktori
+        public Load() { }
 
         public Load(int id, DateTime timestamp, double forecastValue, double measuredValue)
         {
@@ -30,6 +33,24 @@ namespace Common
             this.timestamp = timestamp;
             this.forecastValue = forecastValue;
             this.measuredValue = measuredValue;
+        }
+
+        // Ispis
+        public override string ToString()
+        {
+            return $"[{Id}]: {Timestamp} - {MeasuredValue} ({ForecastValue})";
+        }
+
+        // Equals
+        public override bool Equals(object obj)
+        {
+            return obj is Load l && Id == l.Id && Timestamp == l.Timestamp && MeasuredValue == l.MeasuredValue && ForecastValue == l.forecastValue;
+        }
+
+        // GetHashCode - da ne bi izbacivao Warning
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 }
