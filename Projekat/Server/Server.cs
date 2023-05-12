@@ -19,6 +19,7 @@ namespace Service
 
         // u ovom recniku se skladiste merenja za svaki dan tj. jedan dan predstavlja jedan dictionary<int, Load>  
         static Dictionary<DateTime, Dictionary<int, Load>> recnikSvihMerenja = new Dictionary<DateTime, Dictionary<int, Load>>(); 
+        
         static Dictionary<DateTime ,Audit> auditRecnik = new Dictionary<DateTime, Audit>();
 
         // Uroš
@@ -27,29 +28,39 @@ namespace Service
 
             Dictionary<int, Load> loadRecnik = PretraziInMemoryBazu(datum);
 
-            if (loadRecnik.Count != 0)
+            if (loadRecnik == null)
             {
-                
-                
-                
-                DateTime trenutnoVreme =  DateTime.Now;
-                //napravio sam da se Id generise ovako jer su sanse jakoooo male da se ID ponovi bar mislim 
-                //sa id counterom milim da nece raditi kao sto mi je bila prvobitna ideja
-                int auditId = trenutnoVreme.Millisecond + trenutnoVreme.Minute + trenutnoVreme.Second;
-                Audit audit = new Audit(auditId, trenutnoVreme, MessageType.Info, "Podaci uspesno procitani i prosledjeni");
-
-                //kreiranje audit objekta u kojem se nalazi poruka koja obavestava klijenta o uspesnom nalazenju merenja
-                //E sad nisam bas siguran za timestamp.. da li treba da se stavi vreme kad je zahtev napravljen ili datum merenja
-                //logicnije mi je da bude vreme kad je request napravljen jer datum merenja
+                Audit audit = NapraviAudit(MessageType.Info, $"Podaci za datum {datum} uspesno procitani i prosledjeni");                                
                 auditRecnik.Add(datum, audit);
-                Tuple<List<Load>, Audit> tuple = new Tuple<List<Load>, Audit>(loadRecnik.Values.ToList(), audit);
-                return tuple;
-                //slucaj kada se podaci nalaze u In-Mem bazi podataka, podaci se prosledjuju i tu se funkcija zavrsava
+
+                Tuple<List<Load>, Audit> povratnaVrednost = new Tuple<List<Load>, Audit>(loadRecnik.Values.ToList(), audit);
+                return povratnaVrednost;
+                
             }
             else //u slucaju da nismo nasli podatke u In-Mem bazi prelazimo na pretragu XML baze podataka
             {
-                //ovde treba implementirati logiku pretrage xml baze
-                //var podaciIzBaze = kanal.CitanjeIzXmlBazeLoad(datum);   // ako ne nađe ništa, vraća null, promeni da ne bude var tip
+
+                Dictionary<int, Load> podaciIzBaze = kanal.CitanjeIzXmlBazeLoad(datum);
+                if(podaciIzBaze == null)
+                {
+
+                    Audit audit = NapraviAudit(MessageType.Error, $"Podaci za prosledjen datum {datum} nisu pronadjeni");
+                    auditRecnik.Add(datum, audit);
+
+                    Tuple<List<Load>, Audit> povratnaVrednostZaNullLoad = new Tuple<List<Load>, Audit>(podaciIzBaze.Values.ToList(), audit);
+                    return povratnaVrednostZaNullLoad;
+                }
+                else
+                {
+                   
+                    Audit audit = NapraviAudit(MessageType.Info, $"Podaci za datum {datum} uspesno procitani i prosledjeni");
+                    auditRecnik.Add(datum, audit);
+
+                    Tuple<List<Load>, Audit> povratnaVrednostIzXmlBaze = new Tuple<List<Load>, Audit>(podaciIzBaze.Values.ToList(), audit);
+                    return povratnaVrednostIzXmlBaze;
+                }
+                
+
             }            
         }
 
@@ -57,28 +68,23 @@ namespace Service
         {
             Dictionary<int, Load> loadRecnik = null;
 
-            /*
+            
             if (recnikSvihMerenja.Keys.Contains(datum))
                 loadRecnik = recnikSvihMerenja[datum];
             else
                 loadRecnik = null;
             
             return loadRecnik;
-            */
 
-            foreach (DateTime time in recnikSvihMerenja.Keys)
-            {
-                loadRecnik = recnikSvihMerenja[time];  //uspesno pronadjeno merenje za prosledjeni datum, uzimamo recnik u kom se nalaze merenja za svaki sat                
-            }
-            if (loadRecnik == null)
-            {
-                loadRecnik = new Dictionary<int, Load>();
-                return loadRecnik;
-            }
-            else
-            {
-                return loadRecnik;
-            }
         }        
+        private Audit NapraviAudit(MessageType tipPoruke, string poruka)
+        {
+            //Treba proveriti da li ovaj nacin pravljena ID-a vlaja kad se program bude testirao
+            DateTime trenutnoVreme = DateTime.Now;
+            int auditId = trenutnoVreme.Millisecond + trenutnoVreme.Minute + trenutnoVreme.Second;
+            Audit audit = new Audit(auditId, trenutnoVreme, tipPoruke, poruka);
+
+            return audit;
+        }
     }
 }

@@ -34,28 +34,23 @@ namespace Client
             }
             // Poziv serverske metode
             // List<Load> = kanal.UpitOdKlijenta(datum);
-            kanal.UpitOdKlijenta(datum);
+            Tuple<List<Load>, Audit> rezultat = kanal.UpitOdKlijenta(datum);
             Console.WriteLine("prosledjen datum {0}", datum);
+
+            //DODATI ISPIS AUDIT FAJLA
+
+            Console.WriteLine(rezultat.Item2);
+
+
+
 
             // Čuvanje rezultata pretrage u CSV fajl
             // Ispis poruke o kreiranoj datoteci (poruka sadrži i podatke o putanji i imenu datoteke)
-        }
+
+            List<Load> loadovi = rezultat.Item1;
+        }       
+
        
-
-        //ovo vrv nije dobro
-        public Tuple<List<Load>, Audit> UpitOdKlijenta(DateTime datum)
-        {
-            Load load = new Load();
-            load.Timestamp = datum;
-
-            List<Load> list = new List<Load>();
-            list.Add(load);
-            
-            Tuple<List<Load>, Audit> rez = new Tuple<List<Load>, Audit>(list, null);
-            
-
-            return rez;
-        }
 
         // Nikola
         public void UpisUCSV(List<Load> podaci)
