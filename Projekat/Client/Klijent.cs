@@ -3,7 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
+using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,49 +23,87 @@ namespace Client
 
             while (true)
             {
-                Console.WriteLine("Unos datuma(dd-mm-yyyy): ");
+                Console.WriteLine("Unos datuma (dd-mm-yyyy): ");
                 string input = Console.ReadLine();
-                if (DateTime.TryParseExact(input, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out datum))
+
+                do
                 {
-                    Console.WriteLine("DATE: " + datum);
-                    break;
+                    if (DateTime.TryParseExact(input, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out datum))
+                    {
+                        Console.WriteLine("DATE: " + datum);
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Pogresan unos datuma!");
+                    }
                 }
-                else
+                while (true);
+
+                // Poziv serverske metode
+                // List<Load> = kanal.UpitOdKlijenta(datum);
+                Tuple<List<Load>, Audit> rezultat = kanal.UpitOdKlijenta(datum);
+                Console.WriteLine("Prosledjen datum {0}", datum);
+
+                // TODO DODATI ISPIS AUDIT FAJLA
+
+                Console.WriteLine(rezultat.Item2);
+
+                // Čuvanje rezultata pretrage u CSV fajl
+                // Ispis poruke o kreiranoj datoteci (poruka sadrži i podatke o putanji i imenu datoteke)
+
+                // Šta je ovo?
+                List<Load> loadovi = rezultat.Item1;
+                UpisUCSV(loadovi);
+            }
+        }
+
+        #region CSV
+        public bool UpisUCSV(List<Load> podaci)
+        {
+            bool uspesno = false;
+            string direktorijumZaCsvDatoteka = ConfigurationManager.AppSettings["putanja"];
+
+            // TODO Pravljenje datoteke !!!
+            // results_2023_01_22.csv
+
+            string imeDatoteke = "results_" + podaci[0].Timestamp.ToString("d") + ".csv";
+            //NapraviCsvDatoteku(direktorijumZaCsvDatoteke, imeDatoteke);
+
+            // Promenljiva za memorijski tok
+            MemoryStream stream = new MemoryStream();
+            stream.Position = 0;
+            uspesno = UpisCsvDatoteke(stream, podaci);
+
+            return uspesno;
+        }
+
+        public bool UpisCsvDatoteke(MemoryStream csv, List<Load> zaUpis)
+        {
+            using (StreamWriter csv_stream = new StreamWriter(csv))
+            {
+                string prviRed = "TIME_STAMP, FORECAST_VALUE, MEASURED_VALUE";
+                csv_stream.WriteLine(prviRed);
+
+                foreach (Load l in zaUpis)
                 {
-                    Console.WriteLine("Pogresan unos datuma!");
+                    string upis = "";
+                    upis += l.Timestamp.ToString() + ",";
+                    upis += l.ForecastValue.ToString() + ",";
+                    upis += l.MeasuredValue.ToString() + ",";
+
+                    csv_stream.WriteLine(upis);
                 }
             }
-            // Poziv serverske metode
-            // List<Load> = kanal.UpitOdKlijenta(datum);
-            Tuple<List<Load>, Audit> rezultat = kanal.UpitOdKlijenta(datum);
-            Console.WriteLine("prosledjen datum {0}", datum);
 
-            //DODATI ISPIS AUDIT FAJLA
-
-            Console.WriteLine(rezultat.Item2);
-
-
-
-
-            // Čuvanje rezultata pretrage u CSV fajl
-            // Ispis poruke o kreiranoj datoteci (poruka sadrži i podatke o putanji i imenu datoteke)
-
-            List<Load> loadovi = rezultat.Item1;
-        }       
-
-       
-
-        // Nikola
-        public void UpisUCSV(List<Load> podaci)
-        {
-            string putanja = GetSetting("putanja");
-
+            return true;
         }
 
-        // Za učitavanje putanje iz App.config
-        private static string GetSetting(string key)
+        // TODO
+        public void NapraviCsvDatoteku(string direktorijum, string imeDatoteke)
         {
-            return ConfigurationManager.AppSettings[key];
+
         }
+        #endregion
     }
 }

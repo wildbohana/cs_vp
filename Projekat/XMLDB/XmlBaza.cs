@@ -1,20 +1,25 @@
 ﻿using Common;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 // Bojana
-// Rad sa datotekama treba da bude implemen�ran tako da se vodi računa o održavanju memorije, korišćenjem Dispose paterna
+// Rad sa datotekama treba da bude implementiran tako da se vodi računa o održavanju memorije, korišćenjem Dispose paterna
+// XML baza podataka sadrži XML datoteke u koje se upisuju podaci
+// Svaka tabela je implemen�rana kroz jednu XML datoteku.
+// Ukoliko XML datoteka ne postoji, potrebno je da bude kreirana automatski.
 
 namespace XMLDB
 {
+    // AAAALLLLOOOO STREAM WRITER VALJDA PAMTI TRENUTNU POZICIJU/RED U FAJLU
+    // DA LI JE PREKO POSITION ILI ČEGA VEĆ; NE ZNAM
+    // PREKO TOGA SKONTATI KOJI JE RED U TABELI; I ONDA VRATI REČNIK
+
     public class XmlBaza : IXmlDb
-    {
-        // XML baza podataka sadrži XML datoteke u koje se upisuju podaci
-        // Svaka tabela je implemen�rana kroz jednu XML datoteku.
-        // Ukoliko XML datoteka ne postoji, potrebno je da bude kreirana automatski.
+    {   
         public bool UpisUXmlBazuLoad(List<Load> tabela)
         {
             string putanjaDoTabele = "TBL_LOAD.xml";
@@ -22,7 +27,7 @@ namespace XMLDB
             return false;
         }
 
-        public List<Load> CitanjeIzXmlBazeLoad(DateTime datum)
+        public Dictionary<int, Load> CitanjeIzXmlBazeLoad(DateTime datum)
         {
             string putanjaDoTabele = "TBL_LOAD.xml";
 

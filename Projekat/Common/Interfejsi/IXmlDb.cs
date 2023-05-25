@@ -13,7 +13,7 @@ namespace Common
         [OperationContract]
         bool UpisUXmlBazuLoad(List<Load> tabela);
         [OperationContract]
-        List<Load> CitanjeIzXmlBazeLoad(DateTime datum);
+        Dictionary<int, Load> CitanjeIzXmlBazeLoad(DateTime datum);
 
         [OperationContract]
         bool UpisUXmlBazuAudit(Audit podatak);
