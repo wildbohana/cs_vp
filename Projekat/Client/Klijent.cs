@@ -10,6 +10,8 @@ using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 
+// KLijent vrši upis Audit-a u bazu (poziva metodu) i vrši upis u CSV
+
 namespace Client
 {
     public class Klijent
@@ -23,51 +25,53 @@ namespace Client
 
             while (true)
             {
-                Console.WriteLine("Unos datuma (dd-mm-yyyy): ");
-                string input = Console.ReadLine();
-
                 do
                 {
+                    Console.WriteLine("Unos datuma (dd-mm-yyyy): ");
+                    string input = Console.ReadLine();
+
                     if (DateTime.TryParseExact(input, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out datum))
                     {
-                        Console.WriteLine("DATE: " + datum);
+                        Console.WriteLine("DATUM: " + datum);
                         break;
                     }
                     else
                     {
-                        Console.WriteLine("Pogresan unos datuma!");
+                        Console.WriteLine("Pogrešan unos datuma!");
                     }
                 }
                 while (true);
 
                 // Poziv serverske metode
-                // List<Load> = kanal.UpitOdKlijenta(datum);
-                Tuple<List<Load>, Audit> rezultat = kanal.UpitOdKlijenta(datum);
                 Console.WriteLine("Prosledjen datum {0}", datum);
+                Tuple<List<Load>, Audit> rezultat = kanal.UpitOdKlijenta(datum);
 
-                // TODO DODATI ISPIS AUDIT FAJLA
-
+                // Ispis Audit fajla na konzolu
                 Console.WriteLine(rezultat.Item2);
 
                 // Čuvanje rezultata pretrage u CSV fajl
                 // Ispis poruke o kreiranoj datoteci (poruka sadrži i podatke o putanji i imenu datoteke)
 
-                // Šta je ovo?
+                // Load objekti - rezultat pretrage
                 List<Load> loadovi = rezultat.Item1;
-                UpisUCSV(loadovi);
+                if (loadovi.Count > 0)
+                {
+                    UpisUCSV(loadovi);
+                }
             }
         }
+
+        // Čisto ovako pitanje - ako več postoji CSV datoteka, ali je prepisujem ili šta radim?
+        // Možda je najbolje da je samo prepišem
 
         #region CSV
         public bool UpisUCSV(List<Load> podaci)
         {
+            // results_2023_01_22.csv
             bool uspesno = false;
             string direktorijumZaCsvDatoteka = ConfigurationManager.AppSettings["putanja"];
-
-            // TODO Pravljenje datoteke !!!
-            // results_2023_01_22.csv
-
-            string imeDatoteke = "results_" + podaci[0].Timestamp.ToString("d") + ".csv";
+             string imeDatoteke = "results_" + podaci[0].Timestamp.ToString("d") + ".csv";
+            
             //NapraviCsvDatoteku(direktorijumZaCsvDatoteke, imeDatoteke);
 
             // Promenljiva za memorijski tok

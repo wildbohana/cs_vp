@@ -64,9 +64,7 @@ namespace Service
 
         #endregion
 
-        // Key - red u tabeli (XML), Value - objekat
-        private int redUTabeliLoad;
-        private int redUTabeliAudit;
+        // Key - ID objekta | Value - objekat
         static Dictionary<int, Load> recnikLoad; 
         static Dictionary<int, Audit> recnikAudit;
 
@@ -76,74 +74,80 @@ namespace Service
             kanal = KonekcijaBaza();
             vremeIzmedjuProvera = CitanjeVremenaIzKonfiguracije();
 
-            redUTabeliAudit = 0;        // += brojDodatih u XML bazi (ili neki drugi način, ne znam), možda ovo sačuvati u externi txt?
-            redUTabeliLoad = 0;         // += brojUcitanih iz XML baze (ili neki drugi način, ne znam), možda i ovo sačuvati u ecterni txt? ili dodati funkciju neku
-
             recnikLoad = new Dictionary<int, Load>();
             recnikAudit = new Dictionary<int, Audit>();
         }
 
-        // Uroš
+        #region OBRADA UPITA
         public Tuple<List<Load>, Audit> UpitOdKlijenta(DateTime datum)
         {
-            Dictionary<int, Load> loadRecnik = PretraziInMemoryBazu(datum);
+            List<Load> pretraga = PretraziInMemoryBazu(datum);
 
-            if (loadRecnik == null)
+            // Pretraga lokalno
+            if (pretraga.Count > 0)
             {
                 Audit audit = NapraviAudit(MessageType.Info, $"Podaci za datum {datum} uspesno procitani i prosledjeni");                                
-                recnikAudit.Add(redUTabeliAudit, audit);
+                recnikAudit.Add(audit.Id, audit);
 
-                Tuple<List<Load>, Audit> povratnaVrednost = new Tuple<List<Load>, Audit>(loadRecnik.Values.ToList(), audit);
+                Tuple<List<Load>, Audit> povratnaVrednost = new Tuple<List<Load>, Audit>(pretraga, audit);
                 return povratnaVrednost;
-                
             }
-            else //u slucaju da nismo nasli podatke u In-Mem bazi prelazimo na pretragu XML baze podataka
+            // Pretraga XML
+            else
             {
-                Dictionary<int, Load> podaciIzBaze = kanal.CitanjeIzXmlBazeLoad(datum);
-                if(podaciIzBaze == null)
+                List<Load> podaciIzBaze = kanal.ProcitajIzBazePodataka(datum);
+
+                if (podaciIzBaze.Count == 0)
                 {
-
                     Audit audit = NapraviAudit(MessageType.Error, $"Podaci za prosledjen datum {datum} nisu pronadjeni");
-                    recnikAudit.Add(redUTabeliAudit, audit);
+                    recnikAudit.Add(audit.Id, audit);
 
-                    Tuple<List<Load>, Audit> povratnaVrednostZaNullLoad = new Tuple<List<Load>, Audit>(podaciIzBaze.Values.ToList(), audit);
+                    Tuple<List<Load>, Audit> povratnaVrednostZaNullLoad = new Tuple<List<Load>, Audit>(podaciIzBaze, audit);
                     return povratnaVrednostZaNullLoad;
                 }
                 else
-                {  
-                    Audit audit = NapraviAudit(MessageType.Info, $"Podaci za datum {datum} uspesno procitani i prosledjeni");
-                    recnikAudit.Add(redUTabeliAudit, audit);
+                {
+                    // Upiši podatke u lokalnu memoriju, prijavi na event, prosledi ih klijentu
+                    foreach (Load l in podaciIzBaze)
+                    {
+                        recnikLoad.Add(l.Id, l);
 
-                    Tuple<List<Load>, Audit> povratnaVrednostIzXmlBaze = new Tuple<List<Load>, Audit>(podaciIzBaze.Values.ToList(), audit);
+                        // TODO delegat za brisanje
+                    }
+
+                    Audit audit = NapraviAudit(MessageType.Info, $"Podaci za datum {datum} uspesno procitani i prosledjeni");
+                    recnikAudit.Add(audit.Id, audit);
+
+                    Tuple<List<Load>, Audit> povratnaVrednostIzXmlBaze = new Tuple<List<Load>, Audit>(podaciIzBaze, audit);
                     return povratnaVrednostIzXmlBaze;
                 }
             }
         }
 
-        private Dictionary<int, Load> PretraziInMemoryBazu(DateTime datum)
+        private List<Load> PretraziInMemoryBazu(DateTime datum)
         {
-            Dictionary<int, Load> loadRecnik = null;
-            int i = 0;
+            List<Load> trazeni = new List<Load>();
 
-            foreach (KeyValuePair<int, Load> kvp in recnikLoad)
-            {
-                if (kvp.Value.Timestamp.Year == datum.Year && kvp.Value.Timestamp.Month == datum.Month && kvp.Value.Timestamp.Day == datum.Day)
-                {
-                    loadRecnik.Add(kvp.Key, kvp.Value);
-                }
-            }
-
-            return loadRecnik;
+            foreach (Load l in recnikLoad.Values)
+                if (l.Timestamp.Year == datum.Year && l.Timestamp.Month == datum.Month && l.Timestamp.Day == datum.Day)
+                    trazeni.Add(l);
+           
+            return trazeni;
         }
 
         private Audit NapraviAudit(MessageType tipPoruke, string poruka)
         {
-            // TODO napravi ID za audit
-            DateTime trenutnoVreme = DateTime.Now;
-            int auditId = 0;
-            Audit audit = new Audit(auditId, trenutnoVreme, tipPoruke, poruka);
+            DateTime vreme = DateTime.Now;
+            int auditId = kanal.NajveciAudit();
+            Audit audit = new Audit(++auditId, vreme, tipPoruke, poruka);
 
             return audit;
         }
+        #endregion
+
+        #region DELEGATI
+        // TODO napravi ga lol
+
+        #endregion
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Common.Datoteke;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
@@ -11,13 +12,12 @@ namespace Common
     public interface IXmlDb
     {
         [OperationContract]
-        bool UpisUXmlBazuLoad(List<Load> tabela);
+        IRadSaDatotekom OtvoriDatoteku(string putanjaDatoteke);
         [OperationContract]
-        Dictionary<int, Load> CitanjeIzXmlBazeLoad(DateTime datum);
-
+        List<Load> ProcitajIzBazePodataka(DateTime trazeniDatum);
         [OperationContract]
-        bool UpisUXmlBazuAudit(Audit podatak);
+        int NajveciAudit();
         [OperationContract]
-        Audit CitanjeIzXmlBazeAudit(DateTime datum);
+        void UpisUBazuPodataka(List<Audit> auditi);
     }
 }

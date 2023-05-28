@@ -43,6 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Datoteke\IRadSaDatotekom.cs" />
+    <Compile Include="Datoteke\RadSaDatotekom.cs" />
     <Compile Include="Modeli\Audit.cs" />
     <Compile Include="Interfejsi\IServer.cs" />
     <Compile Include="Interfejsi\IXmlDb.cs" />
