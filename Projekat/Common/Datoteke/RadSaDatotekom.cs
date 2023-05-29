@@ -11,8 +11,8 @@ namespace Common.Datoteke
     [DataContract]
     public class RadSaDatotekom : IRadSaDatotekom
     {
-        private MemoryStream tokPodataka;       // Tok bajtova u kojoj se nalazi trenutno obrađivana datoteka
-        private string nazivDatoteke;           // Naziv datoteke koja je trenutno otvorena
+        private MemoryStream tokPodataka;       // Tok bajtova koji je pročitan iz datoteke, odnosno koji će biti upisan u datoteku
+        private string nazivDatoteke;           // Naziv datoteke sa kojom se radi
 
         [DataMember]
         public MemoryStream TokPodataka { get => tokPodataka; set => tokPodataka = value; }
@@ -38,7 +38,7 @@ namespace Common.Datoteke
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine($"Greška prilikom oslobadjanja memorije datoteke {NazivDatoteke}");
+                    Console.WriteLine($"Greška prilikom oslobađanja memorije datoteke {NazivDatoteke}");
                 }
             }
         }

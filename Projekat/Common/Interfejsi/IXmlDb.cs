@@ -18,6 +18,6 @@ namespace Common
         [OperationContract]
         int NajveciAudit();
         [OperationContract]
-        void UpisUBazuPodataka(List<Audit> auditi);
+        void UpisUBazuPodataka(Audit auditi);
     }
 }

@@ -86,8 +86,9 @@ namespace Service
             // Pretraga lokalno
             if (pretraga.Count > 0)
             {
-                Audit audit = NapraviAudit(MessageType.Info, $"Podaci za datum {datum} uspesno procitani i prosledjeni");                                
+                Audit audit = NapraviAudit(MessageType.Info, $"Podaci za datum {datum.ToString("dd.MM.yyyy.")} uspesno procitani i prosledjeni");                                
                 recnikAudit.Add(audit.Id, audit);
+                kanal.UpisUBazuPodataka(audit);
 
                 Tuple<List<Load>, Audit> povratnaVrednost = new Tuple<List<Load>, Audit>(pretraga, audit);
                 return povratnaVrednost;
@@ -99,11 +100,12 @@ namespace Service
 
                 if (podaciIzBaze.Count == 0)
                 {
-                    Audit audit = NapraviAudit(MessageType.Error, $"Podaci za prosledjen datum {datum} nisu pronadjeni");
+                    Audit audit = NapraviAudit(MessageType.Error, $"Podaci za prosledjen datum {datum.ToString("dd.MM.yyyy.")} nisu pronadjeni");
                     recnikAudit.Add(audit.Id, audit);
+                    kanal.UpisUBazuPodataka(audit);
 
-                    Tuple<List<Load>, Audit> povratnaVrednostZaNullLoad = new Tuple<List<Load>, Audit>(podaciIzBaze, audit);
-                    return povratnaVrednostZaNullLoad;
+                    Tuple<List<Load>, Audit> povratnaVrednostNeuspesno = new Tuple<List<Load>, Audit>(podaciIzBaze, audit);
+                    return povratnaVrednostNeuspesno;
                 }
                 else
                 {
@@ -115,8 +117,9 @@ namespace Service
                         // TODO delegat za brisanje
                     }
 
-                    Audit audit = NapraviAudit(MessageType.Info, $"Podaci za datum {datum} uspesno procitani i prosledjeni");
+                    Audit audit = NapraviAudit(MessageType.Info, $"Podaci za datum {datum.ToString("dd.MM.yyyy.")} uspesno procitani i prosledjeni");
                     recnikAudit.Add(audit.Id, audit);
+                    kanal.UpisUBazuPodataka(audit);
 
                     Tuple<List<Load>, Audit> povratnaVrednostIzXmlBaze = new Tuple<List<Load>, Audit>(podaciIzBaze, audit);
                     return povratnaVrednostIzXmlBaze;
@@ -126,7 +129,7 @@ namespace Service
 
         private List<Load> PretraziInMemoryBazu(DateTime datum)
         {
-            List<Load> trazeni = new List<Load>();
+            List<Load> trazeni = new List<Load>(24);
 
             foreach (Load l in recnikLoad.Values)
                 if (l.Timestamp.Year == datum.Year && l.Timestamp.Month == datum.Month && l.Timestamp.Day == datum.Day)
@@ -134,7 +137,9 @@ namespace Service
            
             return trazeni;
         }
+        #endregion
 
+        #region AUDIT
         private Audit NapraviAudit(MessageType tipPoruke, string poruka)
         {
             DateTime vreme = DateTime.Now;

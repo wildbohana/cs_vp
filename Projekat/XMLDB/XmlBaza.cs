@@ -10,18 +10,11 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 
-// Bojana
-// Rad sa datotekama treba da bude implementiran tako da se vodi računa o održavanju memorije, korišćenjem Dispose paterna
-// XML baza podataka sadrži XML datoteke u koje se upisuju podaci
-// Svaka tabela je implementirana kroz jednu XML datoteku.
-// Ukoliko XML datoteka ne postoji, potrebno je da bude kreirana automatski.
-
 namespace XMLDB
 {
     public class XmlBaza : IXmlDb
     {
         #region OTVARANJE XML
-        // Za otvaranje XML datoteke
         public IRadSaDatotekom OtvoriDatoteku(string putanjaDatoteke)
         {
             // Ako XML datoteka ne postoji, treba je automatski napraviti
@@ -33,9 +26,8 @@ namespace XMLDB
                 novi.Save(putanjaDatoteke);
             }
 
-            // Disposable pattern + MemoryStream
+            // Otvaramo XML datoteku i sve podatke iz nje kopiramo u Memory Stream koji vraćamo pozivaocu metode
             MemoryStream ms = new MemoryStream();
-
             using (FileStream xml = new FileStream(putanjaDatoteke, FileMode.Open, FileAccess.Read))
             {
                 xml.CopyTo(ms);
@@ -49,20 +41,19 @@ namespace XMLDB
         #endregion
 
         #region ČITANJE LOAD
-        // Za čitanje iz Load objekata baze
         public List<Load> ProcitajIzBazePodataka(DateTime trazeniDatum)
         {
-            List<Load> procitano = new List<Load>();
+            List<Load> procitano = new List<Load>(24);
 
+            // Pri instanciranju promenljive datoteka pozivamo metodu OtvoriDatoteku
+            // Ona učitava sve bajtove iz XML baze za Load podatke
             using (IRadSaDatotekom datoteka = new XmlBaza().OtvoriDatoteku(ConfigurationManager.AppSettings["LoadBaza"]))
             {
                 XmlDocument baza = new XmlDocument();
                 baza.Load(((RadSaDatotekom)datoteka).TokPodataka);
 
-                // citanje podataka samo za tekuci dan
+                // Pretraga podataka sa traženim datumom (TIME_STAMP sadrži taj datum)
                 string datum = trazeniDatum.ToString("yyyy-MM-dd");
-                
-                // Pronađe sve podatke iz baze koji u svom TIMESTAMP imaju prosleđeni datum
                 XmlNodeList podaci = baza.SelectNodes("//row[TIME_STAMP[contains(., '" + datum + "')]]");
 
                 foreach (XmlNode podatak in podaci)
@@ -71,8 +62,8 @@ namespace XMLDB
                     {
                         Id = int.Parse(podatak.SelectSingleNode("ID").InnerText),
                         Timestamp = DateTime.Parse(podatak.SelectSingleNode("TIME_STAMP").InnerText),
-                        MeasuredValue = double.Parse(podatak.SelectSingleNode("MEASURED_VALUE").InnerText),
-                        ForecastValue = double.Parse(podatak.SelectSingleNode("FORECAST_VALUE").InnerText)
+                        MeasuredValue = Convert.ToDouble(podatak.SelectSingleNode("MEASURED_VALUE").InnerText.Replace(".", ",")),
+                        ForecastValue = Convert.ToDouble(podatak.SelectSingleNode("FORECAST_VALUE").InnerText.Replace(".", ","))
                     };
                     procitano.Add(novi);
                 }
@@ -110,8 +101,8 @@ namespace XMLDB
         }
         #endregion
 
-        #region UPIS LOAD
-        public void UpisUBazuPodataka(List<Audit> auditi)
+        #region UPIS AUDIT
+        public void UpisUBazuPodataka(Audit a)
         {
             string putanjaAudit = ConfigurationManager.AppSettings["AuditBaza"];
 
@@ -119,20 +110,17 @@ namespace XMLDB
             {
                 XDocument xmlAudit = XDocument.Load(((RadSaDatotekom)datoteka).TokPodataka);
 
-                foreach (Audit a in auditi)
-                {
-                    XElement stavke = xmlAudit.Element("STAVKE");
-                    XElement novi = new XElement("row");
+                XElement stavke = xmlAudit.Element("STAVKE");
+                XElement novi = new XElement("row");
 
-                    novi.Add(new XElement("ID", a.Id));
-                    novi.Add(new XElement("TIME_STAMP", a.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff")));
-                    novi.Add(new XElement("MESSAGE_TYPE", a.MessageType));
-                    novi.Add(new XElement("MESSAGE", a.Message));
+                novi.Add(new XElement("ID", a.Id));
+                novi.Add(new XElement("TIME_STAMP", a.Timestamp.ToString("yyyy-MM-dd HH:mm:ss.fff")));
+                novi.Add(new XElement("MESSAGE_TYPE", a.MessageType));
+                novi.Add(new XElement("MESSAGE", a.Message));
 
-                    stavke.Add(novi);
-                    xmlAudit.Save(putanjaAudit);
-                }
-
+                stavke.Add(novi);
+                xmlAudit.Save(putanjaAudit);
+                
                 datoteka.Dispose();
             }
         }
