@@ -66,19 +66,32 @@ namespace Client
             string imeDatoteke = "results_" + podaci[0].Timestamp.ToString("yyyy_MM_dd") + ".csv";
             string putanjaDatoteke = direktorijumZaCsvDatoteka + "\\" + imeDatoteke;
 
+            // Nova funkcija
+            UpisDatoteka(podaci, putanjaDatoteke);
+        }
+
+        public void UpisDatoteka(List<Load> podaci, string putanjaDatoteke)
+        {
             // Pretvaramo listu podataka u MemoryStream
             string tekst = PretvoriListuUString(podaci);
-            MemoryStream stream = GenerisanjeStrimaOdStringa(tekst);
+            MemoryStream ms = GenerisanjeStrimaOdStringa(tekst);
 
-            using (IRadSaDatotekom datoteka = new Klijent().UpisUDatoteku(putanjaDatoteke, stream))
+            // Ako CSV datoteka postoji, obriši je, javi korisniku
+            if (File.Exists(putanjaDatoteke))
             {
-                // Dispose resursa za datoteku
-                datoteka.Dispose();
-                Console.WriteLine("Podaci su upisani u datoteku: " + putanjaDatoteke);
+                Console.WriteLine("Datoteka sa rezultatima pretrage za taj datum već postoji. Datoteka će biti prepisana.");
+                File.Delete(putanjaDatoteke);
             }
 
-            // Ne moramo pozivati Dispose ovde, ali olakšavamo Garbage Collector-u
-            stream.Dispose();
+            // Za FileStream je potreban i Dispose i Finalize (koji automatski poziva using)
+            using (FileStream csv = new FileStream(putanjaDatoteke, FileMode.CreateNew, FileAccess.Write))
+            {
+                csv.Write(ms.ToArray(), 0, ms.ToArray().Length);
+                csv.Dispose();
+            }
+
+            // Dovoljno je samo Dispose
+            ms.Dispose();
         }
 
         public string PretvoriListuUString(List<Load> zaUpis)
@@ -100,24 +113,6 @@ namespace Client
         public static MemoryStream GenerisanjeStrimaOdStringa(string value)
         {
             return new MemoryStream(Encoding.UTF8.GetBytes(value ?? ""));
-        }
-
-        public IRadSaDatotekom UpisUDatoteku(string putanjaDatoteke, MemoryStream ms)
-        {
-            // Ako CSV datoteka postoji, obriši je
-            if (File.Exists(putanjaDatoteke))
-            {
-                Console.WriteLine("Datoteka sa rezultatima pretrage za taj datum već postoji. Podaci će biti prepisani.");
-                File.Delete(putanjaDatoteke);
-            }
-
-            using (FileStream csv = new FileStream(putanjaDatoteke, FileMode.CreateNew, FileAccess.Write))
-            {
-                csv.Write(ms.ToArray(), 0, ms.ToArray().Length);
-                csv.Dispose();
-            }
-
-            return new RadSaDatotekom(ms, Path.GetFileName(putanjaDatoteke));
         }
         #endregion
     }

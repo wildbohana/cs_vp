@@ -83,10 +83,10 @@ namespace Service
         {
             List<Load> pretraga = PretraziInMemoryBazu(datum);
 
-            // Pretraga lokalno
+            // Pretraga In-Memory
             if (pretraga.Count > 0)
             {
-                Audit audit = NapraviAudit(MessageType.Info, $"Podaci za datum {datum.ToString("dd.MM.yyyy.")} uspesno procitani i prosledjeni");                                
+                Audit audit = NapraviAudit(MessageType.Info, $"Podaci za datum {datum.ToString("dd.MM.yyyy.")} uspesno procitani iz In-Memory baze i prosledjeni.");                                
                 recnikAudit.Add(audit.Id, audit);
                 kanal.UpisUBazuPodataka(audit);
 
@@ -100,7 +100,7 @@ namespace Service
 
                 if (podaciIzBaze.Count == 0)
                 {
-                    Audit audit = NapraviAudit(MessageType.Error, $"Podaci za prosledjen datum {datum.ToString("dd.MM.yyyy.")} nisu pronadjeni");
+                    Audit audit = NapraviAudit(MessageType.Error, $"Podaci za prosledjen datum {datum.ToString("dd.MM.yyyy.")} nisu pronadjeni!");
                     recnikAudit.Add(audit.Id, audit);
                     kanal.UpisUBazuPodataka(audit);
 
@@ -117,7 +117,7 @@ namespace Service
                         // TODO delegat za brisanje
                     }
 
-                    Audit audit = NapraviAudit(MessageType.Info, $"Podaci za datum {datum.ToString("dd.MM.yyyy.")} uspesno procitani i prosledjeni");
+                    Audit audit = NapraviAudit(MessageType.Info, $"Podaci za datum {datum.ToString("dd.MM.yyyy.")} uspesno procitani iz XML baze i prosledjeni.");
                     recnikAudit.Add(audit.Id, audit);
                     kanal.UpisUBazuPodataka(audit);
 
@@ -150,8 +150,14 @@ namespace Service
         }
         #endregion
 
+
         #region DELEGATI
-        // TODO napravi ga lol
+        // TODO
+        public void TajmerZaBrisanje()
+        {
+
+        }
+
 
         #endregion
     }
