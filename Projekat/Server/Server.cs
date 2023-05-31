@@ -1,4 +1,5 @@
 ﻿using Common;
+using Server;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -7,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.ServiceModel;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Serialization;
@@ -17,7 +19,7 @@ namespace Service
     {
         #region SPAJANJE SA BAZOM
         // Kanal za komunikaciju sa XML bazom podataka
-        public static IXmlDb kanal;
+        private static IXmlDb kanal;
 
         private IXmlDb KonekcijaBaza()
         {
@@ -39,19 +41,19 @@ namespace Service
         }
         #endregion
 
-        #region UCITAVANJE VREMENA IZ KONFIGURACIJE
-        private TimeSpan vremeIzmedjuProvera;
+        #region UČITAVANJE VREMENA IZ KONFIGURACIJE
+        private static TimeSpan timeoutZaBrisanje;
         private TimeSpan CitanjeVremenaIzKonfiguracije()
         {
             int sati = 0;
-            int minute = 5;
+            int minute = 15;
             int sekunde = 0;
 
             try
             {
-                sati = int.Parse(ConfigurationManager.AppSettings["proveraSati"]);
-                minute = int.Parse(ConfigurationManager.AppSettings["proveraMinute"]);
-                sekunde = int.Parse(ConfigurationManager.AppSettings["proveraSekunde"]);
+                sati = int.Parse(ConfigurationManager.AppSettings["brisanjeSati"]);
+                minute = int.Parse(ConfigurationManager.AppSettings["brisanjeMinute"]);
+                sekunde = int.Parse(ConfigurationManager.AppSettings["brisanjeSekunde"]);
             }
             catch
             {
@@ -65,17 +67,20 @@ namespace Service
         #endregion
 
         // Key - ID objekta | Value - objekat
-        static Dictionary<int, Load> recnikLoad; 
+        static Dictionary<int, LoadServis> recnikLoad; 
         static Dictionary<int, Audit> recnikAudit;
 
         // Konstruktor
         public Server()
         {
             kanal = KonekcijaBaza();
-            vremeIzmedjuProvera = CitanjeVremenaIzKonfiguracije();
+            timeoutZaBrisanje = CitanjeVremenaIzKonfiguracije();
 
-            recnikLoad = new Dictionary<int, Load>();
+            recnikLoad = new Dictionary<int, LoadServis>();
             recnikAudit = new Dictionary<int, Audit>();
+
+            // Nit koja se stalno vrti
+            Task.Factory.StartNew(() => ProveraIstekaTajmauta());
         }
 
         #region OBRADA UPITA
@@ -83,7 +88,7 @@ namespace Service
         {
             List<Load> pretraga = PretraziInMemoryBazu(datum);
 
-            // Pretraga In-Memory
+            // Pretraga In-Memory baze
             if (pretraga.Count > 0)
             {
                 Audit audit = NapraviAudit(MessageType.Info, $"Podaci za datum {datum.ToString("dd.MM.yyyy.")} uspesno procitani iz In-Memory baze i prosledjeni.");                                
@@ -93,7 +98,7 @@ namespace Service
                 Tuple<List<Load>, Audit> povratnaVrednost = new Tuple<List<Load>, Audit>(pretraga, audit);
                 return povratnaVrednost;
             }
-            // Pretraga XML
+            // Pretraga XML baze
             else
             {
                 List<Load> podaciIzBaze = kanal.ProcitajIzBazePodataka(datum);
@@ -109,14 +114,15 @@ namespace Service
                 }
                 else
                 {
-                    // Upiši podatke u lokalnu memoriju, prijavi na event, prosledi ih klijentu
-                    foreach (Load l in podaciIzBaze)
+                    // Upiši podatke u lokalnu memoriju (thread-safe)
+                    lock (recnikLoad)
                     {
-                        recnikLoad.Add(l.Id, l);
-
-                        // TODO delegat za brisanje
+                        foreach (Load l in podaciIzBaze)
+                        {
+                            recnikLoad.Add(l.Id, new LoadServis { Load = l, VremeDodavanja = DateTime.Now });
+                        }
                     }
-
+                    
                     Audit audit = NapraviAudit(MessageType.Info, $"Podaci za datum {datum.ToString("dd.MM.yyyy.")} uspesno procitani iz XML baze i prosledjeni.");
                     recnikAudit.Add(audit.Id, audit);
                     kanal.UpisUBazuPodataka(audit);
@@ -131,9 +137,9 @@ namespace Service
         {
             List<Load> trazeni = new List<Load>(24);
 
-            foreach (Load l in recnikLoad.Values)
-                if (l.Timestamp.Year == datum.Year && l.Timestamp.Month == datum.Month && l.Timestamp.Day == datum.Day)
-                    trazeni.Add(l);
+            foreach (LoadServis l in recnikLoad.Values)
+                if (l.Load.Timestamp.Year == datum.Year && l.Load.Timestamp.Month == datum.Month && l.Load.Timestamp.Day == datum.Day)
+                    trazeni.Add(l.Load);
            
             return trazeni;
         }
@@ -150,15 +156,53 @@ namespace Service
         }
         #endregion
 
-
-        #region DELEGATI
-        // TODO
-        public void TajmerZaBrisanje()
+        #region BRISANJE POSLE ISTEKA TIMEOUTA
+        // Funkcija za nit
+        private void ProveraIstekaTajmauta()
         {
+            List<int> idLista;
+            Brisanje += new Operacija(BrisanjePodatka);
 
+            while (true)
+            {
+                // Mora bar malo da se uspori rad niti
+                // U suprotnom puca program posle prvog Invoke eventa
+                Thread.Sleep(1000);
+
+                idLista = new List<int>();
+
+                foreach (LoadServis ls in recnikLoad.Values)
+                {
+                    if ((DateTime.Now - ls.VremeDodavanja) > timeoutZaBrisanje)
+                    {
+                        idLista.Add(ls.Load.Id);
+                    }
+                }
+
+                // Pozivanje eventa tek kada se desi da je bar jedan element dodat u listu za brisanje
+                if (idLista.Count > 0)
+                {
+                    Brisanje.Invoke(idLista);
+                }
+            }
         }
 
+        // Definisanje delegata i metode sa istim potpisom kao i delegat
+        private delegate void Operacija(List<int> id);
 
+        private void BrisanjePodatka(List<int> id)
+        {
+            lock (recnikLoad)
+            {
+                foreach (int i in id)
+                    recnikLoad.Remove(i);
+            }
+
+            Console.WriteLine($"Obrisano {id.Count} starih podataka!");
+        }
+
+        // Definisanje eventa
+        private static event Operacija Brisanje;
         #endregion
     }
 }

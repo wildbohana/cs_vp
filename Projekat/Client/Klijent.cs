@@ -15,6 +15,7 @@ namespace Client
 {
     public class Klijent
     {
+        #region RAD KLIJENTA
         public void RadKlijenta(IServer kanal)
         {
             // Unos i validacija datuma
@@ -57,6 +58,7 @@ namespace Client
                 Console.WriteLine();
             }
         }
+        #endregion
 
         #region CSV
         public void UpisUCSV(List<Load> podaci)
@@ -66,7 +68,6 @@ namespace Client
             string imeDatoteke = "results_" + podaci[0].Timestamp.ToString("yyyy_MM_dd") + ".csv";
             string putanjaDatoteke = direktorijumZaCsvDatoteka + "\\" + imeDatoteke;
 
-            // Nova funkcija
             UpisDatoteka(podaci, putanjaDatoteke);
         }
 
@@ -90,7 +91,7 @@ namespace Client
                 csv.Dispose();
             }
 
-            // Dovoljno je samo Dispose
+            // Dovoljno je samo Dispose za MemoryStream
             ms.Dispose();
         }
 
