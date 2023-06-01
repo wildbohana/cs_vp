@@ -14,6 +14,30 @@ namespace XMLDB
 {
     public class XmlBaza : IXmlDb
     {
+        #region KREIRANJE DIREKTORIJUMA
+        public static void Direktorijumi()
+        {
+            string xmlDir = ConfigurationManager.AppSettings["ImeDirektorijuma"];
+            NapraviDirektorijumAkoNePostoji(xmlDir);
+        }
+
+        private static void NapraviDirektorijumAkoNePostoji(string path)
+        {
+            try
+            {
+                DirectoryInfo di = new DirectoryInfo(path);
+                if (!di.Exists)
+                {
+                    di.Create();
+                }
+            }
+            catch
+            {
+
+            }
+        }
+        #endregion
+
         #region OTVARANJE XML
         public IRadSaDatotekom OtvoriDatoteku(string putanjaDatoteke)
         {

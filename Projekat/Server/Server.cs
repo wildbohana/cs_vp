@@ -66,6 +66,30 @@ namespace Service
 
         #endregion
 
+        #region KREIRANJE DIREKTORIJUMA
+        public static void Direktorijumi()
+        {
+            string xmlDir = ConfigurationManager.AppSettings["ImeDirektorijuma"];
+            NapraviDirektorijumAkoNePostoji(xmlDir);
+        }
+
+        private static void NapraviDirektorijumAkoNePostoji(string path)
+        {
+            try
+            {
+                DirectoryInfo di = new DirectoryInfo(path);
+                if (!di.Exists)
+                {
+                    di.Create();
+                }
+            }
+            catch
+            {
+
+            }
+        }
+        #endregion
+
         // Key - ID objekta | Value - objekat
         static Dictionary<int, LoadServis> recnikLoad; 
         static Dictionary<int, Audit> recnikAudit;

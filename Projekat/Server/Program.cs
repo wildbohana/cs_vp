@@ -19,6 +19,8 @@ namespace Service
                 Console.WriteLine("Server je pokrenut.");
                 Console.WriteLine("Adresa servera: " + host.BaseAddresses.FirstOrDefault());
 
+                Server.Direktorijumi();
+
                 Console.WriteLine("Pritisnite bilo koji taster za zaustavljanje servera.");
                 Console.ReadKey();
                 host.Close();
