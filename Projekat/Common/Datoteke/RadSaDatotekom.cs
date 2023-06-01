@@ -25,7 +25,7 @@ namespace Common.Datoteke
             NazivDatoteke = nazivDatoteke;
         }
 
-        // Disposable šablon za rad sa datotekama
+        // Implementacija Dispose()
         public void Dispose()
         {
             if (TokPodataka != null)
@@ -38,7 +38,7 @@ namespace Common.Datoteke
                 }
                 catch (Exception)
                 {
-                    Console.WriteLine($"Greška prilikom oslobađanja memorije datoteke {NazivDatoteke}");
+                    Console.WriteLine($"Greška prilikom oslobađanja memorije, datoteka {NazivDatoteke}");
                 }
             }
         }

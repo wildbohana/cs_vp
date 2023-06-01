@@ -12,8 +12,6 @@ namespace Common
     public interface IXmlDb
     {
         [OperationContract]
-        IRadSaDatotekom OtvoriDatoteku(string putanjaDatoteke);
-        [OperationContract]
         List<Load> ProcitajIzBazePodataka(DateTime trazeniDatum);
         [OperationContract]
         int NajveciAudit();

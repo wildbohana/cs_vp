@@ -44,7 +44,7 @@ namespace Client
                 // Poziv serverske metode za pretragu
                 Tuple<List<Load>, Audit> rezultat = kanal.UpitOdKlijenta(datum);
 
-                // Ispis Audit fajla na konzolu
+                // Ispis Audit objekta na konzolu
                 Console.WriteLine("\n" + rezultat.Item2);
 
                 // Load objekti - rezultat pretrage
@@ -77,14 +77,14 @@ namespace Client
             string tekst = PretvoriListuUString(podaci);
             MemoryStream ms = GenerisanjeStrimaOdStringa(tekst);
 
-            // Ako CSV datoteka postoji, obriši je, javi korisniku
+            // Ako CSV datoteka već postoji, obriši je, javi korisniku
             if (File.Exists(putanjaDatoteke))
             {
                 Console.WriteLine("Datoteka sa rezultatima pretrage za taj datum već postoji. Datoteka će biti prepisana.");
                 File.Delete(putanjaDatoteke);
             }
 
-            // Za FileStream je potreban i Dispose i Finalize (koji automatski poziva using)
+            // Za FileStream je potreban i Dispose i Finalize (koji se automatski poziva na kraju using bloka)
             using (FileStream csv = new FileStream(putanjaDatoteke, FileMode.CreateNew, FileAccess.Write))
             {
                 csv.Write(ms.ToArray(), 0, ms.ToArray().Length);

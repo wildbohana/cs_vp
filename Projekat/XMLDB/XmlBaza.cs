@@ -119,6 +119,8 @@ namespace XMLDB
                 {
 
                 }
+
+                datoteka.Dispose();
             }
 
             return najveciId;

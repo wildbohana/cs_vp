@@ -115,7 +115,7 @@ namespace Service
             // Pretraga In-Memory baze
             if (pretraga.Count > 0)
             {
-                Audit audit = NapraviAudit(MessageType.Info, $"Podaci za datum {datum.ToString("dd.MM.yyyy.")} uspesno procitani iz In-Memory baze i prosledjeni.");                                
+                Audit audit = NapraviAudit(MessageType.Info, $"Podaci za datum {datum:dd.MM.yyyy.} uspesno procitani iz In-Memory baze i prosledjeni.");                                
                 recnikAudit.Add(audit.Id, audit);
                 kanal.UpisUBazuPodataka(audit);
 
@@ -129,7 +129,7 @@ namespace Service
 
                 if (podaciIzBaze.Count == 0)
                 {
-                    Audit audit = NapraviAudit(MessageType.Error, $"Podaci za prosledjen datum {datum.ToString("dd.MM.yyyy.")} nisu pronadjeni!");
+                    Audit audit = NapraviAudit(MessageType.Error, $"Podaci za prosledjen datum {datum:dd.MM.yyyy.} nisu pronadjeni!");
                     recnikAudit.Add(audit.Id, audit);
                     kanal.UpisUBazuPodataka(audit);
 
@@ -147,7 +147,7 @@ namespace Service
                         }
                     }
                     
-                    Audit audit = NapraviAudit(MessageType.Info, $"Podaci za datum {datum.ToString("dd.MM.yyyy.")} uspesno procitani iz XML baze i prosledjeni.");
+                    Audit audit = NapraviAudit(MessageType.Info, $"Podaci za datum {datum:dd.MM.yyyy.} uspesno procitani iz XML baze i prosledjeni.");
                     recnikAudit.Add(audit.Id, audit);
                     kanal.UpisUBazuPodataka(audit);
 
@@ -185,6 +185,7 @@ namespace Service
         private void ProveraIstekaTajmauta()
         {
             List<int> idLista;
+            DateTime vreme;
             Brisanje += new Operacija(BrisanjePodatka);
 
             while (true)
@@ -194,10 +195,11 @@ namespace Service
                 Thread.Sleep(1000);
 
                 idLista = new List<int>();
+                vreme = DateTime.Now;
 
                 foreach (LoadServis ls in recnikLoad.Values)
                 {
-                    if ((DateTime.Now - ls.VremeDodavanja) > timeoutZaBrisanje)
+                    if ((vreme - ls.VremeDodavanja) > timeoutZaBrisanje)
                     {
                         idLista.Add(ls.Load.Id);
                     }
